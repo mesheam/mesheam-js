@@ -7256,6 +7256,7 @@ const Mesheam = exports.Mesheam = () => {
   });
 
   conn.on("open", id => {
+    log("Registered! ", id);
     setStreamOutputHandlers(conn);
     setControlHandlersAndRegister(id);
   });
@@ -7266,6 +7267,7 @@ const Mesheam = exports.Mesheam = () => {
 };
 
 function addInputPeer(id) {
+  log("addInputPeer connecting to -> ", id);
   inputPeers[id] = setStreamInputHandlers(conn.connect(id));
 }
 
@@ -7311,9 +7313,20 @@ function republish(block) {
 
 function setStreamInputHandlers(peerSocket) {
   log("setStreamInputHandlers");
-  peerSocket.on("data", data => {
-    log("got video data, republishing...");
-    republish(data); // data is in data.data
+  peerSocket.on("data", block => {
+    log("got video data -> check hash...");
+    if (hashDoesNotExists(block)) {
+      log("hash verified -> republishing");
+      republish(block);
+      // Proccess video data, data is in data.data
+    } else {
+      log("got old data, ignoring it");
+    }
+  });
+  peerSocket.on("close", () => {
+    log("Input node lost!", peerSocket.peer);
+    removePeer(peerSocket.peer);
+    lostPeer(peerSocket.peer);
   });
   return peerSocket;
 }
