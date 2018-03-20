@@ -10,6 +10,7 @@
     "peer": "^0.2.8"
   },
   "scripts": {
-    "build": "parcel build lib.js"
+    "build": "parcel build lib.js",
+    "start": "parcel run index.html"
   }
 }

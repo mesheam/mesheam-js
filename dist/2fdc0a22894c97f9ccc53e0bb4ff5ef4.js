@@ -74,18 +74,30 @@ require = (function (modules, cache, entry) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-let handler;
+exports.Mesheam = undefined;
 
-const Load = exports.Load = async fn => {
-  handler = fn;
+var _socket = require("socket.io-client");
 
-  window._peerConnection = new Peer({
+var _socket2 = _interopRequireDefault(_socket);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const SERVER = "http://localhost:3000";
+
+let socket;
+let conn;
+let PEERS = {};
+
+const Mesheam = exports.Mesheam = () => {
+  socket = (0, _socket2.default)(SERVER);
+
+  conn = new Peer({
     host: "localhost",
     port: 9000,
     path: "/"
   });
 
-  window._peerConnection.on("connection", con => {
+  conn.on("connection", con => {
     fn({
       listen: fn => {
         con.on("data", fn);
@@ -96,22 +108,27 @@ const Load = exports.Load = async fn => {
     });
   });
 
-  return await new Promise((ac, re) => {
-    window._peerConnection.on("open", id => {
-      ac(id);
+  conn.on("open", id => {
+    socket.emit("stream:nodes:register", {
+      id
     });
-  });
-};
 
-const connect = exports.connect = id => {
-  const con = window._peerConnection.connect(id);
-  handler({
-    listen: fn => {
-      con.on("data", fn);
-    },
-    send: data => {
-      con.send(data);
-    }
+    socket.on("stream:nodes:add", data => {
+      data.ids.forEach(id => {
+        PEERS[id] = conn.connect(id);
+      });
+    });
+    socket.on("stream:nodes:remove", data => {
+      data.ids.forEach(id => {
+        delete PEERS[id];
+      });
+    });
+    socket.on("stream:nodes:replace", data => {
+      PEERS = [];
+      data.ids.forEach(id => {
+        PEERS[id] = conn.connect(id);
+      });
+    });
   });
 };
 },{}],2:[function(require,module,exports) {
@@ -119,16 +136,7 @@ const connect = exports.connect = id => {
 
 var _lib = require("./lib.js");
 
-(async () => {
-  const myId = await (0, _lib.Load)(con => {
-    console.log("New connection:", con);
-    window.con = con;
-  });
-
-  console.log("My id:", myId);
-
-  window.connect = _lib.connect;
-})();
+(0, _lib.Mesheam)();
 },{"./lib.js":3}],0:[function(require,module,exports) {
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -147,7 +155,7 @@ function Module() {
 module.bundle.Module = Module;
 
 if (!module.bundle.parent && typeof WebSocket !== 'undefined') {
-  var ws = new WebSocket('ws://localhost:57773/');
+  var ws = new WebSocket('ws://localhost:61965/');
   ws.onmessage = function(event) {
     var data = JSON.parse(event.data);
 
