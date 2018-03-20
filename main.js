@@ -1,3 +1,3 @@
 import { Mesheam } from "./lib.js";
 
-window.publish = Mesheam();
+window.publish = Mesheam("myVideo");

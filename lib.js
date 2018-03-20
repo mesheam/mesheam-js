@@ -1,17 +1,22 @@
 import io from "socket.io-client";
 
-const SERVER = "http://localhost:3000";
+const SERVER = "http://10.114.146.70:3000";
 
 let hashesSent = [];
 let socket;
 let conn;
 let inputPeers = {};
 let outputPeers = {};
+let videoId;
+let receiving = false;
+let globalStream;
+let emisor = false;
 
-export const Mesheam = () => {
+export const Mesheam = id => {
+  videoId = id;
   socket = io(SERVER);
   conn = new Peer({
-    host: "localhost",
+    host: "10.114.146.70",
     port: 9000,
     path: "/"
   });
@@ -22,68 +27,80 @@ export const Mesheam = () => {
     setControlHandlersAndRegister(id);
   });
 
+  conn.on("call", function(call) {
+    log("got video call -> answering...");
+    if (emisor) return false;
+    if (!receiving) {
+      call.answer();
+      call.on("stream", function(stream) {
+        log("got video data -> recalling...");
+        recall(stream);
+        globalStream = stream;
+        // `stream` is the MediaStream of the remote peer.
+        // Here you'd add it to an HTML video/canvas element.
+        if (!receiving) document.getElementById(videoId).srcObject = stream;
+        receiving = true;
+      });
+    } else {
+      log("Got call but already receiving -> rejected");
+    }
+  });
+
   garbageCollector();
 
-  return publish;
+  return startCamera;
 };
 
 function addInputPeer(id) {
   log("addInputPeer connecting to -> ", id);
-  inputPeers[id] = setStreamInputHandlers(conn.connect(id));
+  inputPeers[id] = true;
+}
+
+function addOutputPeer(id) {
+  log("addOutputPeer connecting to -> ", id);
+  outputPeers[id] = true;
+  if (receiving) {
+    outputPeers[id] = setStreamInputHandlers(conn.call(id, globalStream));
+  } else {
+    log("Not receiving");
+  }
 }
 
 function removePeer(id) {
-  inputPeers[id] && inputPeers[id].close();
-  outputPeers[id] && outputPeers[id].close();
+  inputPeers[id] && inputPeers[id].close && inputPeers[id].close();
+  outputPeers[id] && outputPeers[id].close && outputPeers[id].close();
   delete inputPeers[id];
   delete outputPeers[id];
 }
 
 function lostPeer(id) {
   log("stream:nodes:lost", id);
+  receiving = false;
   socket.emit("stream:nodes:lost", {
     id
   });
 }
 
-function publish(data) {
-  const time = new Date().getTime();
-  const block = {
-    data: data,
-    hash: hashCode(data + time),
-    timestamp: time
-  };
-  republish(block);
+function publish(mediaStream) {
+  log("publish -> recalling ");
+  document.getElementById(videoId).srcObject = mediaStream;
+  receiving = true;
+  emisor = true;
+  recall(mediaStream);
 }
 
-function republish(block) {
-  if (hashDoesNotExists(block)) {
-    log("republish because hashDoesNotExists(block)", hashDoesNotExists(block));
-    hashesSent.push({
-      hash: block.hash,
-      timestamp: block.timestamp
-    });
-    for (var key in outputPeers) {
-      if (outputPeers.hasOwnProperty(key)) {
-        log("publish to " + key + " -> ", block);
-        outputPeers[key].send(block);
-      }
+function recall(stream) {
+  log("recall -> outputPeers", outputPeers);
+  for (var key in outputPeers) {
+    if (outputPeers.hasOwnProperty(key)) {
+      log("call to " + key + " -> ", stream);
+      outputPeers[key] = setStreamInputHandlers(conn.call(key, stream));
     }
   }
 }
 
 function setStreamInputHandlers(peerSocket) {
   log("setStreamInputHandlers");
-  peerSocket.on("data", block => {
-    log("got video data -> check hash...");
-    if (hashDoesNotExists(block)) {
-      log("hash verified -> republishing");
-      republish(block);
-      // Proccess video data, data is in data.data
-    } else {
-      log("got old data, ignoring it");
-    }
-  });
   peerSocket.on("close", () => {
     log("Input node lost!", peerSocket.peer);
     removePeer(peerSocket.peer);
@@ -106,9 +123,14 @@ function setControlHandlersAndRegister(id) {
   socket.emit("stream:nodes:register", {
     id
   });
-  socket.on("stream:nodes:add", data => {
-    log("stream:nodes:add");
+  socket.on("stream:nodes:add:input", data => {
+    log("stream:nodes:add:input");
+    receiving = false;
     addInputPeer(data.id);
+  });
+  socket.on("stream:nodes:add:output", data => {
+    log("stream:nodes:add:output");
+    addOutputPeer(data.id);
   });
   socket.on("stream:nodes:remove", data => {
     log("stream:nodes:remove");
@@ -152,4 +174,24 @@ function garbageCollector() {
   setTimeout(() => {
     garbageCollector();
   }, 60000);
+}
+
+function startCamera() {
+  navigator.getMedia =
+    navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia;
+
+  navigator.getMedia(
+    {
+      video: true,
+      audio: true
+    },
+    localMediaStream => {
+      publish(localMediaStream);
+    },
+    err => {
+      console.log("Error getting camera input: " + err);
+    }
+  );
 }
