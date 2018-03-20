@@ -1,3 +1,3 @@
 import { Mesheam } from "./lib.js";
 
-Mesheam();
+window.publish = Mesheam();
