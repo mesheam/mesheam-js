@@ -47,7 +47,7 @@ export const Mesheam = (server, id, myid) => {
 
   garbageCollector();
 
-  return startCamera;
+  return publish;
 };
 
 function addInputPeer(id) {
@@ -60,7 +60,7 @@ function addOutputPeer(id) {
   document.querySelector("#output").innerHTML += "(" + id + ")";
   log("addOutputPeer connecting to -> ", id);
   outputPeers[id] = true;
-  if (receiving) {
+  if (receiving || emisor) {
     outputPeers[id] = setStreamInputHandlers(conn.call(id, globalStream));
   } else {
     log("Not receiving");
@@ -84,7 +84,7 @@ function removePeer(id) {
 
 function lostPeer(id) {
   log("stream:nodes:lost", id);
-  receiving = false;
+  if (!emisor) receiving = false;
   socket.emit("stream:nodes:lost", {
     id
   });
@@ -93,6 +93,7 @@ function lostPeer(id) {
 function publish(mediaStream) {
   log("publish -> recalling ");
   document.getElementById(videoId).srcObject = mediaStream;
+  globalStream = mediaStream;
   receiving = true;
   emisor = true;
   recall(mediaStream);
