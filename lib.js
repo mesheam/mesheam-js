@@ -12,10 +12,10 @@ let receiving = false;
 let globalStream;
 let emisor = false;
 
-export const Mesheam = id => {
+export const Mesheam = (id, myid) => {
   videoId = id;
   socket = io(SERVER);
-  conn = new Peer({
+  conn = new Peer(myid, {
     host: "10.114.146.70",
     port: 9000,
     path: "/"
@@ -23,6 +23,7 @@ export const Mesheam = id => {
 
   conn.on("open", id => {
     log("Registered! ", id);
+    document.querySelector("#iam").innerHTML = "(" + id + ")";
     setStreamOutputHandlers(conn);
     setControlHandlersAndRegister(id);
   });
@@ -52,11 +53,13 @@ export const Mesheam = id => {
 };
 
 function addInputPeer(id) {
+  document.querySelector("#input").innerHTML += "(" + id + ")";
   log("addInputPeer connecting to -> ", id);
   inputPeers[id] = true;
 }
 
 function addOutputPeer(id) {
+  document.querySelector("#output").innerHTML += "(" + id + ")";
   log("addOutputPeer connecting to -> ", id);
   outputPeers[id] = true;
   if (receiving) {
@@ -67,6 +70,14 @@ function addOutputPeer(id) {
 }
 
 function removePeer(id) {
+  document.querySelector("#output").innerHTML = document
+    .querySelector("#output")
+    .innerHTML.split("(" + id + ")")
+    .join("");
+  document.querySelector("#input").innerHTML = document
+    .querySelector("#input")
+    .innerHTML.split("(" + id + ")")
+    .join("");
   inputPeers[id] && inputPeers[id].close && inputPeers[id].close();
   outputPeers[id] && outputPeers[id].close && outputPeers[id].close();
   delete inputPeers[id];

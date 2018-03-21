@@ -18,19 +18,57 @@ io.on("connection", function(socket) {
   socket.on("stream:nodes:register", data => {
     log("New node registered -> ", data.id);
     NODES[data.id] = socket;
-    NODES[data.id].key = data.id;
     NODES[data.id].outputs = [];
     NODES[data.id].inputs = [];
+    NODES[data.id].key = data.id;
+    findFreePeerFor(data.id);
     findFreePeerFor(data.id);
   });
   socket.on("disconnect", () => {
     log("Node lost ", socket.key, " -> reallocating childs...");
     try {
       delete NODES[socket.key];
-      socket.outputs.forEach(id => {
-        findFreePeerFor(id);
-      });
-    } catch (e) {}
+      log("remove outputs from ", socket.inputs);
+      if (socket.inputs)
+        socket.inputs.forEach(id => {
+          for (let i = 0; i < NODES[id].outputs.length; i++) {
+            if (NODES[id].outputs[i] == socket.key) {
+              log("Removing ", socket.key, " from ", id, "outputs");
+              NODES[id].emit("stream:nodes:remove", {
+                id: socket.key
+              });
+              delete NODES[id].outputs[i];
+            }
+          }
+          NODES[id].outputs = NODES[id].outputs.filter(function(x) {
+            return x !== (undefined || null || "");
+          });
+        });
+      if (socket.outputs) {
+        socket.outputs.forEach(id => {
+          for (let i = 0; i < NODES[id].inputs.length; i++) {
+            if (NODES[id].inputs[i] == socket.key) {
+              log("Removing ", socket.key, " from ", id, "inputs");
+              NODES[id].emit("stream:nodes:remove", {
+                id: socket.key
+              });
+              delete NODES[id].inputs[i];
+            }
+          }
+          NODES[id].inputs = NODES[id].inputs.filter(function(x) {
+            return x !== (undefined || null || "");
+          });
+        });
+        log("Reallocate new inputs for orphan nodes");
+        socket.outputs.forEach(id => {
+          log("reallocating inputs for ", id);
+          findFreePeerFor(id);
+          findFreePeerFor(id);
+        });
+      }
+    } catch (e) {
+      log("ERROR:", e);
+    }
   });
 });
 
@@ -45,11 +83,23 @@ function log(...params) {
 }
 
 function findFreePeerFor(id) {
-  log("findFreePeerFor", id);
+  log("Finding input for", id);
   for (var key in NODES) {
+    if (key == id) continue;
+    log(
+      key,
+      "has outputs",
+      NODES[key].outputs,
+      "and inputs",
+      NODES[key].inputs,
+      "outputs length",
+      NODES[key].outputs.length
+    );
     if (NODES.hasOwnProperty(key)) {
-      if (NODES[key].outputs.length < MAX_OUTPUT && key != id) {
+      if (NODES[key].outputs.length < MAX_OUTPUT) {
         try {
+          if (NODES[id].inputs.indexOf(key) != -1) continue;
+          if (NODES[id].outputs.indexOf(key) != -1) continue;
           log("[" + id + "]", "free peer found! -> linking...", key);
           NODES[key].outputs.push(id);
           NODES[id].inputs.push(key);
@@ -65,15 +115,16 @@ function findFreePeerFor(id) {
         }
       }
     }
+    log(key, "not worked");
   }
   setTimeout(() => {
     try {
+      if (typeof NODES[id] == "undefined") return;
       if (NODES[id].inputs.length < MAX_INPUT) {
-        log("Free peer not found for ", id, " -> retrying", Object.keys(NODES));
         findFreePeerFor(id);
       }
     } catch (e) {
-      log("ERROR:", e);
+      log("ERR", e);
     }
   }, 1000);
 }

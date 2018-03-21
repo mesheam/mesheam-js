@@ -68,7 +68,7 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({17:[function(require,module,exports) {
+})({16:[function(require,module,exports) {
 /**
  * Parses an URI
  *
@@ -263,7 +263,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],16:[function(require,module,exports) {
+},{}],22:[function(require,module,exports) {
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -823,7 +823,7 @@ function localstorage() {
     return window.localStorage;
   } catch (e) {}
 }
-},{"./debug":16,"process":11}],5:[function(require,module,exports) {
+},{"./debug":22,"process":11}],5:[function(require,module,exports) {
 var global = (1,eval)("this");
 
 /**
@@ -901,7 +901,7 @@ function url (uri, loc) {
   return obj;
 }
 
-},{"parseuri":17,"debug":9}],27:[function(require,module,exports) {
+},{"parseuri":16,"debug":9}],27:[function(require,module,exports) {
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1546,7 +1546,7 @@ module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],13:[function(require,module,exports) {
+},{}],14:[function(require,module,exports) {
 var global = (1,eval)("this");
 
 module.exports = isBuf;
@@ -1562,7 +1562,7 @@ function isBuf(obj) {
          (global.ArrayBuffer && (obj instanceof ArrayBuffer || ArrayBuffer.isView(obj)));
 }
 
-},{}],12:[function(require,module,exports) {
+},{}],13:[function(require,module,exports) {
 var global = (1,eval)("this");
 /*global Blob,File*/
 
@@ -1706,7 +1706,7 @@ exports.removeBlobs = function(data, callback) {
   }
 };
 
-},{"isarray":25,"./is-buffer":13}],10:[function(require,module,exports) {
+},{"isarray":25,"./is-buffer":14}],10:[function(require,module,exports) {
 
 /**
  * Module dependencies.
@@ -2116,7 +2116,7 @@ function error(msg) {
   };
 }
 
-},{"debug":24,"component-emitter":15,"has-binary2":35,"./binary":12,"isarray":25,"./is-buffer":13}],43:[function(require,module,exports) {
+},{"debug":24,"component-emitter":15,"has-binary2":35,"./binary":13,"isarray":25,"./is-buffer":14}],43:[function(require,module,exports) {
 
 /**
  * Module exports.
@@ -3451,7 +3451,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"engine.io-parser":39,"component-emitter":15}],22:[function(require,module,exports) {
+},{"engine.io-parser":39,"component-emitter":15}],21:[function(require,module,exports) {
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -4216,7 +4216,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":26,"parseqs":22,"engine.io-parser":39,"component-inherit":45,"yeast":44,"debug":36,"xmlhttprequest-ssl":29}],30:[function(require,module,exports) {
+},{"../transport":26,"parseqs":21,"engine.io-parser":39,"component-inherit":45,"yeast":44,"debug":36,"xmlhttprequest-ssl":29}],30:[function(require,module,exports) {
 var global = (1,eval)("this");
 /**
  * Module requirements.
@@ -4631,7 +4631,7 @@ function unloadHandler () {
   }
 }
 
-},{"xmlhttprequest-ssl":29,"./polling":34,"component-emitter":15,"component-inherit":45,"debug":36}],31:[function(require,module,exports) {
+},{"xmlhttprequest-ssl":29,"./polling":34,"component-emitter":15,"component-inherit":45,"debug":36}],32:[function(require,module,exports) {
 var global = (1,eval)("this");
 
 /**
@@ -4867,7 +4867,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 
 },{"./polling":34,"component-inherit":45}],33:[function(require,module,exports) {
 
-},{}],32:[function(require,module,exports) {
+},{}],31:[function(require,module,exports) {
 var global = (1,eval)("this");
 /**
  * Module dependencies.
@@ -5156,7 +5156,7 @@ WS.prototype.check = function () {
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":26,"engine.io-parser":39,"parseqs":22,"component-inherit":45,"yeast":44,"debug":36,"ws":33}],28:[function(require,module,exports) {
+},{"../transport":26,"engine.io-parser":39,"parseqs":21,"component-inherit":45,"yeast":44,"debug":36,"ws":33}],28:[function(require,module,exports) {
 var global = (1,eval)("this");
 /**
  * Module dependencies
@@ -5212,7 +5212,7 @@ function polling (opts) {
   }
 }
 
-},{"xmlhttprequest-ssl":29,"./polling-xhr":30,"./polling-jsonp":31,"./websocket":32}],20:[function(require,module,exports) {
+},{"xmlhttprequest-ssl":29,"./polling-xhr":30,"./polling-jsonp":32,"./websocket":31}],19:[function(require,module,exports) {
 
 var indexOf = [].indexOf;
 
@@ -5969,7 +5969,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-},{"./transports/index":28,"component-emitter":15,"debug":36,"indexof":20,"engine.io-parser":39,"parseuri":17,"parseqs":22,"./transport":26}],14:[function(require,module,exports) {
+},{"./transports/index":28,"component-emitter":15,"debug":36,"indexof":19,"engine.io-parser":39,"parseuri":16,"parseqs":21,"./transport":26}],12:[function(require,module,exports) {
 
 module.exports = require('./socket');
 
@@ -5981,7 +5981,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":23,"engine.io-parser":39}],21:[function(require,module,exports) {
+},{"./socket":23,"engine.io-parser":39}],20:[function(require,module,exports) {
 module.exports = toArray
 
 function toArray(list, index) {
@@ -6022,7 +6022,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],18:[function(require,module,exports) {
+},{}],17:[function(require,module,exports) {
 /**
  * Slice reference.
  */
@@ -6467,7 +6467,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"socket.io-parser":10,"component-emitter":15,"to-array":21,"./on":8,"component-bind":18,"debug":9,"parseqs":22}],19:[function(require,module,exports) {
+},{"socket.io-parser":10,"component-emitter":15,"to-array":20,"./on":8,"component-bind":17,"debug":9,"parseqs":21}],18:[function(require,module,exports) {
 
 /**
  * Expose `Backoff`.
@@ -7129,7 +7129,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"engine.io-client":14,"./socket":7,"component-emitter":15,"socket.io-parser":10,"./on":8,"component-bind":18,"debug":9,"indexof":20,"backo2":19}],4:[function(require,module,exports) {
+},{"engine.io-client":12,"./socket":7,"component-emitter":15,"socket.io-parser":10,"./on":8,"component-bind":17,"debug":9,"indexof":19,"backo2":18}],4:[function(require,module,exports) {
 
 /**
  * Module dependencies.
@@ -7251,10 +7251,10 @@ let receiving = false;
 let globalStream;
 let emisor = false;
 
-const Mesheam = exports.Mesheam = id => {
+const Mesheam = exports.Mesheam = (id, myid) => {
   videoId = id;
   socket = (0, _socket2.default)(SERVER);
-  conn = new Peer({
+  conn = new Peer(myid, {
     host: "10.114.146.70",
     port: 9000,
     path: "/"
@@ -7262,6 +7262,7 @@ const Mesheam = exports.Mesheam = id => {
 
   conn.on("open", id => {
     log("Registered! ", id);
+    document.querySelector("#iam").innerHTML = "(" + id + ")";
     setStreamOutputHandlers(conn);
     setControlHandlersAndRegister(id);
   });
@@ -7291,11 +7292,13 @@ const Mesheam = exports.Mesheam = id => {
 };
 
 function addInputPeer(id) {
+  document.querySelector("#input").innerHTML += "(" + id + ")";
   log("addInputPeer connecting to -> ", id);
   inputPeers[id] = true;
 }
 
 function addOutputPeer(id) {
+  document.querySelector("#output").innerHTML += "(" + id + ")";
   log("addOutputPeer connecting to -> ", id);
   outputPeers[id] = true;
   if (receiving) {
@@ -7306,6 +7309,8 @@ function addOutputPeer(id) {
 }
 
 function removePeer(id) {
+  document.querySelector("#output").innerHTML = document.querySelector("#output").innerHTML.split("(" + id + ")").join("");
+  document.querySelector("#input").innerHTML = document.querySelector("#input").innerHTML.split("(" + id + ")").join("");
   inputPeers[id] && inputPeers[id].close && inputPeers[id].close();
   outputPeers[id] && outputPeers[id].close && outputPeers[id].close();
   delete inputPeers[id];
@@ -7432,7 +7437,7 @@ function startCamera() {
 
 var _lib = require("./lib.js");
 
-window.publish = (0, _lib.Mesheam)("myVideo");
+window.publish = (0, _lib.Mesheam)("myVideo", prompt("myid"));
 },{"./lib.js":3}],0:[function(require,module,exports) {
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -7451,7 +7456,7 @@ function Module() {
 module.bundle.Module = Module;
 
 if (!module.bundle.parent && typeof WebSocket !== 'undefined') {
-  var ws = new WebSocket('ws://localhost:52523/');
+  var ws = new WebSocket('ws://localhost:53010/');
   ws.onmessage = function(event) {
     var data = JSON.parse(event.data);
 
