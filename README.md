@@ -1,14 +1,20 @@
 # mesheam-js
 
+## Start
+
 P2p Mesh Streaming system
 
 * Install `npm install`
+
+* Change parameters in `main.js`
+
 * Run the server `node server.js`
 * Run the front `parcel index.html`
+* Navigate to `http://localhost:1234`
 
 * Start transmiting webcam from one of the clients using `publish()`
 
-## To Do
+## Features
 
 * [x] Fault-tolerant peer to peer network
 * [x] Attach to the network when already streaming
