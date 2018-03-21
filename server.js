@@ -1,7 +1,7 @@
 const PEERJSPORT = 9000;
 const SOCKETIOPORT = 3000;
-const MAX_INPUT = 2;
-const MAX_OUTPUT = 2;
+const MAX_INPUT = 1;
+const MAX_OUTPUT = 3;
 
 const PeerServer = require("peer").PeerServer;
 const app = require("express")();
@@ -21,8 +21,9 @@ io.on("connection", function(socket) {
     NODES[data.id].outputs = [];
     NODES[data.id].inputs = [];
     NODES[data.id].key = data.id;
-    findFreePeerFor(data.id);
-    findFreePeerFor(data.id);
+    for (let e = 0; e < MAX_INPUT; e++) {
+      findFreePeerFor(data.id);
+    }
   });
   socket.on("disconnect", () => {
     log("Node lost ", socket.key, " -> reallocating childs...");
@@ -62,8 +63,9 @@ io.on("connection", function(socket) {
         log("Reallocate new inputs for orphan nodes");
         socket.outputs.forEach(id => {
           log("reallocating inputs for ", id);
-          findFreePeerFor(id);
-          findFreePeerFor(id);
+          for (let e = 0; e < MAX_INPUT; e++) {
+            findFreePeerFor(id);
+          }
         });
       }
     } catch (e) {
