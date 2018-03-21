@@ -1,7 +1,5 @@
 import io from "socket.io-client";
 
-const SERVER = "http://10.114.146.70:3000";
-
 let hashesSent = [];
 let socket;
 let conn;
@@ -12,11 +10,11 @@ let receiving = false;
 let globalStream;
 let emisor = false;
 
-export const Mesheam = (id, myid) => {
+export const Mesheam = (server, id, myid) => {
   videoId = id;
-  socket = io(SERVER);
+  socket = io(server + ":3000");
   conn = new Peer(myid, {
-    host: "10.114.146.70",
+    host: server,
     port: 9000,
     path: "/"
   });

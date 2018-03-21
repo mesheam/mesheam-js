@@ -7239,8 +7239,6 @@ var _socket2 = _interopRequireDefault(_socket);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const SERVER = "http://10.114.146.70:3000";
-
 let hashesSent = [];
 let socket;
 let conn;
@@ -7251,11 +7249,11 @@ let receiving = false;
 let globalStream;
 let emisor = false;
 
-const Mesheam = exports.Mesheam = (id, myid) => {
+const Mesheam = exports.Mesheam = (server, id, myid) => {
   videoId = id;
-  socket = (0, _socket2.default)(SERVER);
+  socket = (0, _socket2.default)(server + ":3000");
   conn = new Peer(myid, {
-    host: "10.114.146.70",
+    host: server,
     port: 9000,
     path: "/"
   });
@@ -7437,7 +7435,7 @@ function startCamera() {
 
 var _lib = require("./lib.js");
 
-window.publish = (0, _lib.Mesheam)("myVideo", prompt("myid"));
+window.publish = (0, _lib.Mesheam)("10.114.146.70", "myVideo", prompt("myid"));
 },{"./lib.js":3}],0:[function(require,module,exports) {
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
