@@ -96,6 +96,9 @@ function publish(mediaStream) {
   globalStream = mediaStream;
   receiving = true;
   emisor = true;
+  // socket.emit("stream:nodes:iam:master", {
+  //   id
+  // });
   recall(mediaStream);
 }
 
