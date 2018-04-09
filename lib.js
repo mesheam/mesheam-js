@@ -12,10 +12,10 @@ let emisor = false;
 
 export const Mesheam = (id, server, myid) => {
   videoId = id;
-  server = (server + ":3000") | "3000";
-  socket = io(server);
+  server = server ? server + ":3000" : window.location.hostname + ":3000";
+  socket = io("http://" + server);
   conn = new Peer(myid, {
-    host: server,
+    host: window.location.hostname,
     port: 9000,
     path: "/"
   });

@@ -12,6 +12,6 @@
   },
   "scripts": {
     "build": "parcel build lib.js",
-    "start": "parcel run index.html"
+    "start": "parcel index.html"
   }
 }
