@@ -10,9 +10,10 @@ let receiving = false;
 let globalStream;
 let emisor = false;
 
-export const Mesheam = (server, id, myid) => {
+export const Mesheam = (id, server, myid) => {
   videoId = id;
-  socket = io(server + ":3000");
+  server = (server + ":3000") | "3000";
+  socket = io(server);
   conn = new Peer(myid, {
     host: server,
     port: 9000,
