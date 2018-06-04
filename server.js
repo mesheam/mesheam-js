@@ -1,9 +1,7 @@
-const PEERJSPORT = 9000;
 const SOCKETIOPORT = 3000;
 const MAX_INPUT = 1;
 const MAX_OUTPUT = 2;
 
-const PeerServer = require("mesheam-peer").PeerServer;
 const app = require("express")();
 const http = require("http").Server(app);
 const io = require("socket.io")(http, {
@@ -12,7 +10,6 @@ const io = require("socket.io")(http, {
 });
 
 const NODES = {};
-const server = PeerServer({ port: PEERJSPORT, path: "/" });
 
 io.on("connection", function(socket) {
   socket.on("stream:nodes:register", data => {
@@ -87,9 +84,7 @@ io.on("connection", function(socket) {
 });
 
 http.listen(SOCKETIOPORT, function() {
-  console.log(
-    "Listening on " + SOCKETIOPORT + " and PeerServer on " + PEERJSPORT
-  );
+  console.log("Listening on " + SOCKETIOPORT);
 });
 
 function log(...params) {
