@@ -1,9 +1,9 @@
 const PEERJSPORT = 9000;
 const SOCKETIOPORT = 3000;
 const MAX_INPUT = 1;
-const MAX_OUTPUT = 3;
+const MAX_OUTPUT = 2;
 
-const PeerServer = require("peer").PeerServer;
+const PeerServer = require("mesheam-peer").PeerServer;
 const app = require("express")();
 const http = require("http").Server(app);
 const io = require("socket.io")(http, {
@@ -24,6 +24,18 @@ io.on("connection", function(socket) {
     for (let e = 0; e < MAX_INPUT; e++) {
       findFreePeerFor(data.id);
     }
+  });
+  socket.on("signal:to", data => {
+    NODES[data.target].emit("call", {
+      id: socket.key,
+      data: data.data
+    });
+  });
+  socket.on("signal:back", data => {
+    NODES[data.target].emit("callback", {
+      id: socket.key,
+      data: data.data
+    });
   });
   socket.on("disconnect", () => {
     log("Node lost ", socket.key, " -> reallocating childs...");

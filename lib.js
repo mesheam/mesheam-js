@@ -1,49 +1,60 @@
 import io from "socket.io-client";
+import Peer from "simple-peer";
 
 let hashesSent = [];
 let socket;
-let conn;
 let inputPeers = {};
 let outputPeers = {};
 let videoId;
 let receiving = false;
 let globalStream;
 let emisor = false;
+let myid;
+let waitForSignal = true;
 
-export const Mesheam = (id, server, myid) => {
+export const Mesheam = (id, server) => {
+  myid = makeid();
   videoId = id;
   server = server ? server + ":3000" : window.location.hostname + ":3000";
   socket = io("http://" + server);
-  conn = new Peer(myid, {
-    host: window.location.hostname,
-    port: 9000,
-    path: "/"
-  });
 
-  conn.on("open", id => {
-    log("Registered! ", id);
-    document.querySelector("#iam").innerHTML = "(" + id + ")";
-    setStreamOutputHandlers(conn);
-    setControlHandlersAndRegister(id);
-  });
+  setControlHandlersAndRegister(myid);
+  log("Registered! ", myid);
+  document.querySelector("#iam").innerHTML = "(" + myid + ")";
 
-  conn.on("call", function(call) {
-    log("got video call -> answering...");
-    if (emisor) return false;
-    if (!receiving) {
-      call.answer();
-      call.on("stream", function(stream) {
+  socket.on("call", data => {
+    log("got video call ...");
+    if (!inputPeers[data.id]) {
+      log("first call, creating receiver");
+      inputPeers[data.id] = new Peer({
+        reconnectTimer: 2000
+      });
+      inputPeers[data.id].on("signal", signal => {
+        log("receiver got signal from ", data.id);
+        log("emit signal:back to ", data.id);
+        socket.emit("signal:back", {
+          target: data.id,
+          data: signal
+        });
+      });
+      inputPeers[data.id].on("stream", stream => {
+        // Resend to output Peers
         log("got video data -> recalling...");
-        recall(stream);
         globalStream = stream;
-        // `stream` is the MediaStream of the remote peer.
-        // Here you'd add it to an HTML video/canvas element.
+        recall();
+
+        // Play video
+        log("I'm already receiving?", receiving);
         if (!receiving) document.getElementById(videoId).srcObject = stream;
         receiving = true;
       });
-    } else {
-      log("Got call but already receiving -> rejected");
+      inputPeers[data.id].on("close", () => {
+        log("Input node lost!", data.id);
+        removePeer(data.id);
+        lostPeer(data.id);
+      });
     }
+    inputPeers[data.id].signal(data.data);
   });
 
   garbageCollector();
@@ -54,15 +65,15 @@ export const Mesheam = (id, server, myid) => {
 function addInputPeer(id) {
   document.querySelector("#input").innerHTML += "(" + id + ")";
   log("addInputPeer connecting to -> ", id);
-  inputPeers[id] = true;
+  inputPeers[id] = false;
 }
 
 function addOutputPeer(id) {
   document.querySelector("#output").innerHTML += "(" + id + ")";
   log("addOutputPeer connecting to -> ", id);
-  outputPeers[id] = true;
+  outputPeers[id] = false;
   if (receiving || emisor) {
-    outputPeers[id] = setStreamInputHandlers(conn.call(id, globalStream));
+    recall();
   } else {
     log("Not receiving");
   }
@@ -97,42 +108,41 @@ function publish(mediaStream) {
   globalStream = mediaStream;
   receiving = true;
   emisor = true;
-  // socket.emit("stream:nodes:iam:master", {
-  //   id
-  // });
-  recall(mediaStream);
+  socket.emit("stream:nodes:iam:master", {
+    myid
+  });
+  recall();
 }
 
-function recall(stream) {
-  log("recall -> outputPeers", outputPeers);
+function recall() {
   for (var key in outputPeers) {
     if (outputPeers.hasOwnProperty(key)) {
-      log("call to " + key + " -> ", stream);
-      outputPeers[key] = setStreamInputHandlers(conn.call(key, stream));
+      setCaller(key);
     }
   }
 }
 
-function setStreamInputHandlers(peerSocket) {
-  log("setStreamInputHandlers");
-  peerSocket.on("close", () => {
-    log("Input node lost!", peerSocket.peer);
-    removePeer(peerSocket.peer);
-    lostPeer(peerSocket.peer);
+function setCaller(key) {
+  if (outputPeers[key]) {
+    log("Peer " + key + " already have a Caller, do nothing");
+    return;
+  }
+  log("setCaller for " + key);
+  outputPeers[key] = new Peer({
+    initiator: true,
+    stream: globalStream,
+    reconnectTimer: 2000
   });
-  return peerSocket;
-}
-
-function setStreamOutputHandlers(peerSocket) {
-  log("setStreamOutputHandlers");
-  conn.on("connection", con => {
-    log("New peer connected to me", con.peer);
-    outputPeers[con.peer] = con;
+  outputPeers[key].on("signal", data => {
+    log("Send signal to " + key, data);
+    socket.emit("signal:to", {
+      target: key,
+      data
+    });
   });
 }
 
 function setControlHandlersAndRegister(id) {
-  log("setControlHandlersAndRegister");
   log("stream:nodes:register");
   socket.emit("stream:nodes:register", {
     id
@@ -149,6 +159,13 @@ function setControlHandlersAndRegister(id) {
   socket.on("stream:nodes:remove", data => {
     log("stream:nodes:remove");
     removePeer(data.id);
+  });
+  socket.on("callback", data => {
+    log("Got call back from " + data.id, data.data);
+    try {
+      log("signaling " + data.id + " caller");
+      outputPeers[data.id].signal(data.data);
+    } catch (e) {}
   });
 }
 
@@ -176,7 +193,11 @@ function hashCode(string) {
   return hash;
 }
 
+let gcSet = null;
 function garbageCollector() {
+  if (gcSet) {
+    return;
+  }
   log("garbageCollector");
   const tenMin = 1000 * 60 * 10;
   const now = new Date().getTime();
@@ -185,7 +206,8 @@ function garbageCollector() {
       delete hashesSent[h];
     }
   });
-  setTimeout(() => {
+  gcSet = setTimeout(() => {
+    gcSet = null;
     garbageCollector();
   }, 60000);
 }
@@ -208,4 +230,15 @@ function startCamera() {
       console.log("Error getting camera input: " + err);
     }
   );
+}
+
+function makeid() {
+  var text = "";
+  var possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 15; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
 }
