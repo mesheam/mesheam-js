@@ -5,7 +5,7 @@ const puppeteer = require("puppeteer");
     headless: true
   });
   const page = await browser.newPage();
-  await page.goto("http://localhost:5000");
+  await page.goto("http://localhost:8080");
   await page.waitFor(5000);
   await page.evaluate(() => {
     window.play();
