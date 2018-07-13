@@ -5,22 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>TEST</title>
+    <title>Nightcore</title>
     <script src="./simplepeer.min.js"></script>
 </head>
 
 <body>
-    <div>I am:
-        <span id="iam"></span>
-    </div>
-    <div>input:
-        <span id="input"></span>
-    </div>
-    <div>output:
-        <span id="output"></span>
+    <div style="display: none">
+        <div>I am:
+            <span id="iam"></span>
+        </div>
+        <div>input:
+            <span id="input"></span>
+        </div>
+        <div>output:
+            <span id="output"></span>
+        </div>
     </div>
     <video id="myVideo" autoplay width="800" height="600"></video>
-    <video src="./video.mp4" id="tostream" style="display: none" loop></video>
+    <video id="tostream" crossOrigin="anonymous" style="display: none" loop></video>
     <script src="./main.js"></script>
 </body>
 
