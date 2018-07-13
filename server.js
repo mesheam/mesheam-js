@@ -1,4 +1,4 @@
-const SOCKETIOPORT = 3000;
+const SOCKETIOPORT = 7000;
 const MAX_INPUT = 1;
 const MAX_OUTPUT = 2;
 

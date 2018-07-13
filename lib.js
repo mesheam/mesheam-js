@@ -15,7 +15,7 @@ let waitForSignal = true;
 export const Mesheam = (id, server) => {
   myid = makeid();
   videoId = id;
-  server = server ? server + ":3000" : window.location.hostname + ":3000";
+  server = server ? server + ":7000" : window.location.hostname + ":7000";
   socket = io("http://" + server);
 
   setControlHandlersAndRegister(myid);
