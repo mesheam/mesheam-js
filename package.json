@@ -16,7 +16,7 @@
   "scripts": {
     "build": "parcel build --out-dir public --public-url ./ index.html",
     "start": "parcel index.html",
-    "serve": "cd public && serve . &",
-    "deploy": "npm run build && npm run serve -l 8080 && node server.js"
+    "serve": "cd public && serve . -l 8080 &",
+    "deploy": "npm run build && npm run serve && node server.js"
   }
 }
