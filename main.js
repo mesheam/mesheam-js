@@ -1,6 +1,6 @@
 import { Mesheam } from "./lib.js";
 
-window.publish = Mesheam("myVideo");
+window.publish = Mesheam("myVideo", "https://streamserver.galax.be");
 
 window.play = () => {
   document.querySelector("#tostream").play();
